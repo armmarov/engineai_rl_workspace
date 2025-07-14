@@ -51,9 +51,10 @@ async def play(args):
         return
     repo = Repo(ENGINEAI_WORKSPACE_ROOT_DIR)
     current_commit, current_branch = get_current_commit_and_branch(repo)
-    _, log_dir = get_log_root_and_log_dir(args)
-    checkout_resume_commit(log_dir, repo)
-    apply_patch(os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR)
+    if not args.current_files:
+        _, log_dir = get_log_root_and_log_dir(args)
+        checkout_resume_commit(log_dir, repo)
+        apply_patch(os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR)
     generate_cfg_files_from_json(args)
     from engineai_gym.wrapper import VecGymWrapper, RecordVideoWrapper
     import engineai_rl_workspace.exps
@@ -73,7 +74,6 @@ async def play(args):
         env_cfg,
         algo_cfg,
     ) = exp_registry.get_class_and_cfg(name=args.exp_name, args=args)
-
     checkout_commit_or_branch(repo, current_commit, current_branch)
     unstash_files(repo)
     if lock.redis.get(lock.lock_key) == lock.pid.encode():

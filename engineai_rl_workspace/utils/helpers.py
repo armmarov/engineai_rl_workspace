@@ -220,6 +220,12 @@ def get_args():
             "help": "Start an existing run from resumes files, but not loading a checkpoint.",
         },
         {
+            "name": "--current_files",
+            "action": "store_true",
+            "default": False,
+            "help": "Using current files to resume or run_exist instead of checking out resume files and patch",
+        },
+        {
             "name": "--sub_exp_name",
             "type": str,
             "default": "default",
