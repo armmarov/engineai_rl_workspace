@@ -374,6 +374,18 @@ def delete_class_attributes_value(pyfile_name, node, del_items, key_names=None):
             print(f"Deleting redundant attribute: {attr_name} (in {pyfile_name})")
 
 
+def delete_class_subscripts(node):
+    sub_nodes_to_remove = []
+    for sub_node in node.body:
+        if hasattr(sub_node, "name"):
+            delete_class_subscripts(sub_node)
+        elif isinstance(sub_node, ast.Assign) and len(sub_node.targets) == 1:
+            if not hasattr(sub_node.targets[0], "id"):
+                sub_nodes_to_remove.append(sub_node)
+    for sub_node in sub_nodes_to_remove:
+        node.body.remove(sub_node)
+
+
 def generate_py_from_dict(target_config_data, py_files):
     trees = get_trees_from_py_files(py_files)
     source_config_data = generate_dict_from_trees(trees)
@@ -404,6 +416,7 @@ def generate_py_from_dict(target_config_data, py_files):
         for idx, node in enumerate(ast.walk(tree)):
             if isinstance(node, ast.ClassDef):
                 delete_class_attributes_value(py_file, node, del_dict)
+                delete_class_subscripts(node)
                 break
     for tree, py_file in zip(trees, py_files):
         with open(py_file, "w") as file:
