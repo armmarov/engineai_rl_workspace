@@ -36,6 +36,10 @@ def generate_dict_from_node(node, config):
                     if target.id in config:
                         del config[target.id]
                     config["<expr " + target.id + ">"] = value
+            elif isinstance(target, ast.Subscript):
+                value = astor.to_source(sub_node.value).strip()
+                slice = eval(astor.to_source(target.slice).strip())
+                config[target.value.id][slice] = eval(value)
         elif isinstance(sub_node, ast.ClassDef):
             if sub_node.name not in config:
                 config[sub_node.name] = {}
