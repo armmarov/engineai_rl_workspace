@@ -353,6 +353,7 @@ def delete_class_attributes_value(pyfile_name, node, del_items, key_names=None):
         key_names = node.name
     for attr_name, attr_value in del_items.items():
         if isinstance(attr_value, dict):
+            sub_nodes_to_remove = []
             for sub_node in node.body:
                 if hasattr(sub_node, "name"):
                     if sub_node.name == attr_name:
@@ -363,13 +364,18 @@ def delete_class_attributes_value(pyfile_name, node, del_items, key_names=None):
                             key_names + "." + attr_name,
                         )
                         if not sub_node.body:
-                            node.body.remove(sub_node)
+                            sub_nodes_to_remove.append(sub_node)
+            for sub_node in sub_nodes_to_remove:
+                node.body.remove(sub_node)
         else:
+            sub_nodes_to_remove = []
             for sub_node in node.body:
                 if isinstance(sub_node, ast.Assign) and len(sub_node.targets) == 1:
                     if hasattr(sub_node.targets[0], "id"):
                         if sub_node.targets[0].id == attr_name:
-                            node.body.remove(sub_node)
+                            sub_nodes_to_remove.append(sub_node)
+            for sub_node in sub_nodes_to_remove:
+                node.body.remove(sub_node)
             attr_name = key_names + "." + attr_name
             print(f"Deleting redundant attribute: {attr_name} (in {pyfile_name})")
 
