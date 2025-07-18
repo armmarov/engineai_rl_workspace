@@ -1,4 +1,4 @@
-import os, asyncio
+import os, asyncio, multiprocessing
 import pygame
 from threading import Thread
 import numpy as np
@@ -23,6 +23,7 @@ from engineai_rl_workspace import (
     LOCK_MESSAGE,
     INITIALIZATION_COMPLETE_MESSAGE,
     ENGINEAI_WORKSPACE_ROOT_DIR,
+    FAIL_TO_LOAD_JSON_MESSAGE,
 )
 from engineai_rl_lib.redis_lock import RedisLock
 from engineai_rl_lib.git import (
@@ -55,7 +56,17 @@ async def play(args):
         _, log_dir = get_log_root_and_log_dir(args)
         checkout_resume_commit(log_dir, repo)
         apply_patch(os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR)
-    generate_cfg_files_from_json(args)
+    process = multiprocessing.Process(target=generate_cfg_files_from_json, args=(args,))
+    process.start()
+    process.join()
+    if process.exitcode != 0:
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            try:
+                checkout_commit_or_branch(repo, current_commit, current_branch)
+                unstash_files(repo)
+            finally:
+                lock.release()
+        raise RuntimeError(FAIL_TO_LOAD_JSON_MESSAGE)
     from engineai_gym.wrapper import VecGymWrapper, RecordVideoWrapper
     import engineai_rl_workspace.exps
     from engineai_rl_workspace.utils.exp_registry import exp_registry

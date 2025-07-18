@@ -7,10 +7,11 @@ from engineai_rl_workspace import (
     PROGRAM_START_MESSAGE,
     INITIALIZATION_COMPLETE_MESSAGE,
     ENGINEAI_WORKSPACE_ROOT_DIR,
+    FAIL_TO_LOAD_JSON_MESSAGE,
 )
 
 print(PROGRAM_START_MESSAGE)
-import os, asyncio
+import os, asyncio, multiprocessing
 from git import Repo
 
 from engineai_rl_workspace.utils import (
@@ -67,7 +68,19 @@ async def train(args):
             apply_patch(
                 os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR
             )
-        generate_cfg_files_from_json(args)
+        process = multiprocessing.Process(
+            target=generate_cfg_files_from_json, args=(args,)
+        )
+        process.start()
+        process.join()
+        if process.exitcode != 0:
+            if lock.redis.get(lock.lock_key) == lock.pid.encode():
+                try:
+                    checkout_commit_or_branch(repo, current_commit, current_branch)
+                    unstash_files(repo)
+                finally:
+                    lock.release()
+            raise RuntimeError(FAIL_TO_LOAD_JSON_MESSAGE)
         import engineai_rl_workspace.exps
 
         if IS_DISTRIBUTED:

@@ -24,3 +24,6 @@ PROGRAM_START_MESSAGE = Color.apply(
     Color.MAGENTA,
 )
 INITIALIZATION_COMPLETE_MESSAGE = Color.apply("Initialization completed!", Color.GREEN)
+FAIL_TO_LOAD_JSON_MESSAGE = Color.apply(
+    "Fail to generate resume files from json, exit.", Color.RED
+)
