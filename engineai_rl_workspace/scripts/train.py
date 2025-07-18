@@ -61,7 +61,7 @@ async def train(args):
     repo = Repo(ENGINEAI_WORKSPACE_ROOT_DIR)
     if args.resume or args.run_exist and GPU_GLOBAL_RANK == 0:
         current_commit, current_branch = get_current_commit_and_branch(repo)
-        if not args.current_files:
+        if not args.current_files and not args.run_exist:
             _, log_dir = get_log_root_and_log_dir(args)
             checkout_resume_commit(log_dir, repo)
             apply_patch(
