@@ -1040,7 +1040,7 @@ class LeggedRobot(EnvBase):
         self.domain_rands.init_rand_vec_on_create_env()
         self.body_mass = torch.zeros(
             self.num_envs,
-            1,
+            self.num_bodies,
             dtype=torch.float32,
             device=self.device,
             requires_grad=False,
@@ -1078,6 +1078,8 @@ class LeggedRobot(EnvBase):
             self.gym.set_actor_rigid_body_properties(
                 env_handle, actor_handle, body_props, recomputeInertia=True
             )
+            for j, prop in enumerate(body_props):
+                self.body_mass[i, j] = prop.mass
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
