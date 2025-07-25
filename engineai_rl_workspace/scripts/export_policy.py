@@ -28,6 +28,8 @@ from engineai_rl_lib.git import (
     checkout_commit_or_branch,
     unstash_files,
     apply_patch,
+    stash_files,
+    unstash_files_without_removing,
 )
 from engineai_rl_lib.class_operations import class_to_dict
 from engineai_rl_lib.redis_lock import RedisLock
@@ -50,6 +52,9 @@ async def export_policy(args):
         _, log_dir = get_log_root_and_log_dir(args)
         checkout_resume_commit(log_dir, repo)
         apply_patch(os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR)
+    else:
+        stash_files(repo)
+        unstash_files_without_removing(repo)
     generate_cfg_files_from_json(args)
     import engineai_rl_workspace.exps
     from engineai_rl_workspace.utils.exp_registry import exp_registry

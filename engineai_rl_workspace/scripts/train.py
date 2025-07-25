@@ -33,6 +33,8 @@ from engineai_rl_lib.git import (
     unstash_files,
     save_patch,
     apply_patch,
+    stash_files,
+    unstash_files_without_removing,
 )
 from engineai_rl_lib.json import save_json_files
 from engineai_rl_lib.redis_lock import RedisLock
@@ -62,12 +64,15 @@ async def train(args):
     repo = Repo(ENGINEAI_WORKSPACE_ROOT_DIR)
     if args.resume or args.run_exist and GPU_GLOBAL_RANK == 0:
         current_commit, current_branch = get_current_commit_and_branch(repo)
-        if not args.current_files and not args.run_exist:
+        if not args.current_files:
             _, log_dir = get_log_root_and_log_dir(args)
             checkout_resume_commit(log_dir, repo)
             apply_patch(
                 os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR
             )
+        else:
+            stash_files(repo)
+            unstash_files_without_removing(repo)
         process = multiprocessing.Process(
             target=generate_cfg_files_from_json, args=(args,)
         )

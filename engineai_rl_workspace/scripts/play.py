@@ -31,6 +31,8 @@ from engineai_rl_lib.git import (
     checkout_commit_or_branch,
     unstash_files,
     apply_patch,
+    stash_files,
+    unstash_files_without_removing,
 )
 
 
@@ -56,6 +58,10 @@ async def play(args):
         _, log_dir = get_log_root_and_log_dir(args)
         checkout_resume_commit(log_dir, repo)
         apply_patch(os.path.join(log_dir, "resume.patch"), ENGINEAI_WORKSPACE_ROOT_DIR)
+    else:
+        stash_files(repo)
+        unstash_files_without_removing(repo)
+
     process = multiprocessing.Process(target=generate_cfg_files_from_json, args=(args,))
     process.start()
     process.join()

@@ -115,3 +115,8 @@ def stash_files(repo):
 def unstash_files(repo):
     if repo.git.stash("list"):
         repo.git.stash("pop")
+
+
+def unstash_files_without_removing(repo):
+    if repo.git.stash("list"):
+        repo.git.stash("apply")
