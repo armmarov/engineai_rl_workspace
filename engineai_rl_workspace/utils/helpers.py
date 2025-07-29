@@ -220,6 +220,12 @@ def get_args():
             "help": "Start an existing run from resumes files, but not loading a checkpoint.",
         },
         {
+            "name": "--late_restore",
+            "action": "store_true",
+            "default": False,
+            "help": "Restore current files after env is created rather than before",
+        },
+        {
             "name": "--current_files",
             "action": "store_true",
             "default": False,

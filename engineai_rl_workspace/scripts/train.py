@@ -124,13 +124,18 @@ async def train(args):
         save_json_files(cfg, log_dir=log_dir, filename="config.json")
     if IS_DISTRIBUTED:
         dist.barrier()
-    if (args.resume or args.run_exist) and GPU_GLOBAL_RANK == 0:
+    if (
+        (args.resume or args.run_exist)
+        and not args.late_restore
+        and GPU_GLOBAL_RANK == 0
+    ):
         checkout_commit_or_branch(repo, current_commit, current_branch)
         unstash_files(repo)
-    if GPU_GLOBAL_RANK == 0:
+    if not args.late_restore and GPU_GLOBAL_RANK == 0:
         if lock.redis.get(lock.lock_key) == lock.pid.encode():
             lock.release()
-    print(INITIALIZATION_COMPLETE_MESSAGE)
+    if not args.late_restore:
+        print(INITIALIZATION_COMPLETE_MESSAGE)
     if args.sim_devices:
         args.sim_device = args.sim_devices[GPU_LOCAL_RANK]
     if args.rl_devices:
@@ -161,6 +166,14 @@ async def train(args):
             video_path=os.path.join(log_dir, "train_videos"),
         )
     ppo_runner = exp_registry.make_alg_runner(env, args.exp_name, args, log_dir, True)
+    if (args.resume or args.run_exist) and args.late_restore and GPU_GLOBAL_RANK == 0:
+        checkout_commit_or_branch(repo, current_commit, current_branch)
+        unstash_files(repo)
+    if args.late_restore and GPU_GLOBAL_RANK == 0:
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            lock.release()
+    if args.late_restore:
+        print(INITIALIZATION_COMPLETE_MESSAGE)
     ppo_runner.learn(
         num_learning_iterations=algo_cfg.runner.max_iterations,
         init_at_random_ep_len=True,

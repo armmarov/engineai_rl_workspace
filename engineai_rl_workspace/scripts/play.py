@@ -91,11 +91,12 @@ async def play(args):
         env_cfg,
         algo_cfg,
     ) = exp_registry.get_class_and_cfg(name=args.exp_name, args=args)
-    checkout_commit_or_branch(repo, current_commit, current_branch)
-    unstash_files(repo)
-    if lock.redis.get(lock.lock_key) == lock.pid.encode():
-        lock.release()
-    print(INITIALIZATION_COMPLETE_MESSAGE)
+    if not args.late_restore:
+        checkout_commit_or_branch(repo, current_commit, current_branch)
+        unstash_files(repo)
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            lock.release()
+        print(INITIALIZATION_COMPLETE_MESSAGE)
 
     # override some parameters for testing
     if args.use_joystick:
@@ -132,6 +133,12 @@ async def play(args):
     # load policy
     runner = exp_registry.make_alg_runner(env, args.exp_name, args, log_dir)
     policy = runner.get_inference_policy()
+    if args.late_restore:
+        checkout_commit_or_branch(repo, current_commit, current_branch)
+        unstash_files(repo)
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            lock.release()
+        print(INITIALIZATION_COMPLETE_MESSAGE)
     tester = Tester(
         env,
         args.test_length,

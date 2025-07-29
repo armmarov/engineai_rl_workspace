@@ -73,11 +73,12 @@ async def export_policy(args):
         env_cfg,
         algo_cfg,
     ) = exp_registry.get_class_and_cfg(name=args.exp_name, args=args)
-    checkout_commit_or_branch(repo, current_commit, current_branch)
-    unstash_files(repo)
-    if lock.redis.get(lock.lock_key) == lock.pid.encode():
-        lock.release()
-    print(INITIALIZATION_COMPLETE_MESSAGE)
+    if not args.late_restore:
+        checkout_commit_or_branch(repo, current_commit, current_branch)
+        unstash_files(repo)
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            lock.release()
+        print(INITIALIZATION_COMPLETE_MESSAGE)
     log_dir, load_run = get_load_run_path(log_root, load_run=args.load_run)
     load_checkpoint = get_load_checkpoint_path(
         load_run=log_dir, checkpoint=args.checkpoint
@@ -283,6 +284,12 @@ async def export_policy(args):
             args.exp_name + "_" + args.load_run + "_policy" + ".mnn",
         ),
     )
+    if args.late_restore:
+        checkout_commit_or_branch(repo, current_commit, current_branch)
+        unstash_files(repo)
+        if lock.redis.get(lock.lock_key) == lock.pid.encode():
+            lock.release()
+        print(INITIALIZATION_COMPLETE_MESSAGE)
 
 
 if __name__ == "__main__":
