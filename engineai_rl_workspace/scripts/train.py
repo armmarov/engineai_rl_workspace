@@ -62,7 +62,7 @@ async def train(args):
             print("Could not acquire lock, exiting...")
             return
     repo = Repo(ENGINEAI_WORKSPACE_ROOT_DIR)
-    if args.resume or args.run_exist and GPU_GLOBAL_RANK == 0:
+    if (args.resume or args.run_exist) and GPU_GLOBAL_RANK == 0:
         current_commit, current_branch = get_current_commit_and_branch(repo)
         if not args.current_files:
             _, log_dir = get_log_root_and_log_dir(args)
@@ -124,7 +124,7 @@ async def train(args):
         save_json_files(cfg, log_dir=log_dir, filename="config.json")
     if IS_DISTRIBUTED:
         dist.barrier()
-    if args.resume or args.run_exist and GPU_GLOBAL_RANK == 0:
+    if (args.resume or args.run_exist) and GPU_GLOBAL_RANK == 0:
         checkout_commit_or_branch(repo, current_commit, current_branch)
         unstash_files(repo)
     if GPU_GLOBAL_RANK == 0:
