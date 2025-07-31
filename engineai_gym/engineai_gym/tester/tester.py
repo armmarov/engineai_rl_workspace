@@ -1,30 +1,22 @@
 import numpy as np
 import os
 import yaml
-import importlib
 from engineai_gym import ENGINEAI_GYM_ROOT_DIR
 from engineai_gym.tester.testers.tester_type_base import TesterTypeBase
-from engineai_rl_lib.files_and_dirs import get_module_path_from_files_in_dir
 from engineai_rl_lib.class_operations import (
     instance_name_to_class_name,
     add_space_to_class_name,
 )
 from engineai_gym.wrapper.record_video_wrapper import RecordVideoWrapper
+from engineai_rl_lib.files_and_dirs import import_modules_of_specific_type_from_path
+
 
 current_file_directory = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "testers"
 )
-import_modules = get_module_path_from_files_in_dir(
-    ENGINEAI_GYM_ROOT_DIR, current_file_directory
+imported_classes = import_modules_of_specific_type_from_path(
+    ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
 )
-imported_classes = {}
-for module_name, module_path in import_modules.items():
-    module = importlib.import_module(module_path)
-    for attribute in dir(module):
-        attr_value = getattr(module, attribute)
-        if isinstance(attr_value, type):
-            if issubclass(attr_value, TesterTypeBase) and attr_value != TesterTypeBase:
-                imported_classes[module_name] = getattr(module, attribute)
 
 
 class Tester:

@@ -1,4 +1,5 @@
 import os
+import importlib
 
 
 def get_module_path_from_folders_in_dir(root_path, dir, prefix="", exception=""):
@@ -65,3 +66,16 @@ def get_module_path(root_path, item_path):
         item_path_without_suffix = item_path
     module = item_path_without_suffix.replace(root_path, "")[1:]
     return module.replace("/", ".")
+
+
+def import_modules_of_specific_type_from_path(package_root, path, end_class=object):
+    import_modules = get_module_path_from_files_in_dir(package_root, path)
+    imported_classes = {}
+    for module_name, module_path in import_modules.items():
+        module = importlib.import_module(module_path)
+        for attribute in dir(module):
+            attr_value = getattr(module, attribute)
+            if isinstance(attr_value, type):
+                if issubclass(attr_value, end_class) and attr_value != end_class:
+                    imported_classes[module_name] = getattr(module, attribute)
+    return imported_classes
