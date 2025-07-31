@@ -9,6 +9,9 @@ from engineai_rl_lib.class_operations import (
 )
 from engineai_gym.wrapper.record_video_wrapper import RecordVideoWrapper
 from engineai_rl_lib.files_and_dirs import import_modules_of_specific_type_from_path
+from engineai_rl_lib.class_operations import get_class_and_parent_paths
+from engineai_rl_lib.dict_operations import expand_and_overwrite_dict
+import inspect
 
 
 class Tester:
@@ -22,12 +25,18 @@ class Tester:
         record_video=False,
         extra_args=None,
     ):
-        current_file_directory = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "testers"
-        )
-        self.imported_classes = import_modules_of_specific_type_from_path(
-            ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
-        )
+        exec(f"from {self.__class__.__module__} import {self.__class__.__name__}")
+        files = get_class_and_parent_paths(self.__class__, Tester)
+        files.insert(0, inspect.getfile(Tester))
+        self.imported_classes = {}
+        for file in files:
+            current_file_directory = os.path.join(os.path.dirname(file), "testers")
+            self.imported_classes = expand_and_overwrite_dict(
+                self.imported_classes,
+                import_modules_of_specific_type_from_path(
+                    ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
+                ),
+            )
         self.env = env
         self.record_video = record_video
         if record_video:

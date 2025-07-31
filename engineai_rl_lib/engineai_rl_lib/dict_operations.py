@@ -1,3 +1,6 @@
+import copy
+
+
 def convert_dict(target_dict, pre_key=""):
     converted_dict = {}
     tmp_converted_dict = {}
@@ -23,3 +26,10 @@ def convert_dicts(target_dicts):
     for target_dict in target_dicts:
         converted_dict_list.append(convert_dict(target_dict))
     return converted_dict_list
+
+
+def expand_and_overwrite_dict(original_dict, new_dict):
+    expanded_dict = copy.deepcopy(original_dict)
+    for key, value in new_dict.items():
+        expanded_dict[key] = value
+    return expanded_dict
