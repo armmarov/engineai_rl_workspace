@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from git import Repo
 
-from engineai_gym import ENGINEAI_GYM_PACKAGE_DIR
+from engineai_gym import ENGINEAI_GYM_PACKAGE_DIR, ENGINEAI_GYM_ROOT_DIR
 from engineai_rl_workspace.utils import (
     get_args,
     generate_cfg_files_from_json,
@@ -141,6 +141,7 @@ async def play(args):
         print(INITIALIZATION_COMPLETE_MESSAGE)
 
     tester_class = import_attr_from_file_path(
+        ENGINEAI_GYM_ROOT_DIR,
         env_cfg.tester.class_path.format(
             ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
         ),

@@ -27,6 +27,7 @@ class Tester:
     ):
         exec(f"from {self.__class__.__module__} import {self.__class__.__name__}")
         files = get_class_and_parent_paths(self.__class__, Tester)
+        files.reverse()
         files.insert(0, inspect.getfile(Tester))
         self.imported_classes = {}
         for file in files:
