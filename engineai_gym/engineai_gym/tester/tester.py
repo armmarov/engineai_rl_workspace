@@ -11,14 +11,6 @@ from engineai_gym.wrapper.record_video_wrapper import RecordVideoWrapper
 from engineai_rl_lib.files_and_dirs import import_modules_of_specific_type_from_path
 
 
-current_file_directory = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "testers"
-)
-imported_classes = import_modules_of_specific_type_from_path(
-    ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
-)
-
-
 class Tester:
     def __init__(
         self,
@@ -30,6 +22,12 @@ class Tester:
         record_video=False,
         extra_args=None,
     ):
+        current_file_directory = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "testers"
+        )
+        self.imported_classes = import_modules_of_specific_type_from_path(
+            ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
+        )
         self.env = env
         self.record_video = record_video
         if record_video:
@@ -57,7 +55,7 @@ class Tester:
             loggers = {}
             for logger in value["loggers"]:
                 loggers[logger.replace("logger_type_", "")] = logger
-            tester_class = imported_classes[key]
+            tester_class = self.imported_classes[key]
             name = add_space_to_class_name(instance_name_to_class_name(key))
             testers[key] = tester_class(
                 name, loggers, env, time, os.path.join(save_path, "data"), extra_args
