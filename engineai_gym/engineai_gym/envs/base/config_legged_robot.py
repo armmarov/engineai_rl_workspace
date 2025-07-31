@@ -24,8 +24,6 @@ class ConfigLeggedRobot(BaseConfig):
         send_timeouts = True
         # episode length in seconds
         episode_length_s = 20
-        # tester config used in play
-        tester_config_path = "{ENGINEAI_GYM_PACKAGE_DIR}/tester/tester_config.yaml"
 
     class safety:
         # a multiplier applied on torque limit of each joint, as a dict: {"joint_name": multiplier}. None if maintaining original torque limit.
@@ -319,3 +317,11 @@ class ConfigLeggedRobot(BaseConfig):
             default_buffer_size_multiplier = 5
             # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
             contact_collection = 2
+
+    class tester:
+        # tester file path
+        class_path = "{ENGINEAI_GYM_PACKAGE_DIR}/tester/tester.py"
+        # tester class name
+        class_name = "Tester"
+        # tester config used in play
+        config_path = "{ENGINEAI_GYM_PACKAGE_DIR}/tester/tester_config.yaml"

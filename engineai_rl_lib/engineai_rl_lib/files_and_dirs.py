@@ -1,5 +1,6 @@
 import os
 import importlib
+import importlib.util
 
 
 def get_module_path_from_folders_in_dir(root_path, dir, prefix="", exception=""):
@@ -79,3 +80,13 @@ def import_modules_of_specific_type_from_path(package_root, path, end_class=obje
                 if issubclass(attr_value, end_class) and attr_value != end_class:
                     imported_classes[module_name] = getattr(module, attribute)
     return imported_classes
+
+
+def import_attr_from_file_path(file_path, attr_name):
+    spec = importlib.util.spec_from_file_location(
+        location=file_path,
+        name="module",
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return getattr(module, attr_name)

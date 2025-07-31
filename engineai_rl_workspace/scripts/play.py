@@ -6,7 +6,6 @@ from tqdm import tqdm
 from git import Repo
 
 from engineai_gym import ENGINEAI_GYM_PACKAGE_DIR
-from engineai_gym.tester.tester import Tester
 from engineai_rl_workspace.utils import (
     get_args,
     generate_cfg_files_from_json,
@@ -34,6 +33,7 @@ from engineai_rl_lib.git import (
     stash_files,
     unstash_files_without_removing,
 )
+from engineai_rl_lib.files_and_dirs import import_attr_from_file_path
 
 
 async def play(args):
@@ -139,12 +139,19 @@ async def play(args):
         if lock.redis.get(lock.lock_key) == lock.pid.encode():
             lock.release()
         print(INITIALIZATION_COMPLETE_MESSAGE)
-    tester = Tester(
+
+    tester_class = import_attr_from_file_path(
+        env_cfg.tester.class_path.format(
+            ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
+        ),
+        env_cfg.tester.class_name,
+    )
+    tester = tester_class(
         env,
         args.test_length,
         env.dt,
         os.path.join(log_dir, "test"),
-        env_cfg.env.tester_config_path.format(
+        env_cfg.tester.config_path.format(
             ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
         ),
         args.video,
