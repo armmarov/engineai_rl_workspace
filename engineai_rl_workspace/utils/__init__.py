@@ -3,7 +3,6 @@ from .helpers import (
     get_load_checkpoint_path,
     get_args,
     set_seed,
-    update_class_from_dict,
     get_resume_path_from_original_path,
 )
 from .process_resume_files import restore_resume_files, restore_original_files

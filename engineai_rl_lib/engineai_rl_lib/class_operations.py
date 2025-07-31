@@ -2,6 +2,8 @@ import re
 import os, sys
 import importlib
 import importlib.util
+import inspect
+from abc import ABC
 
 
 def add_space_to_class_name(class_name):
@@ -109,3 +111,78 @@ def add_instance_properties_and_methods_to_class(original_instance, target_insta
 
             bound_method = make_method(name)
             setattr(type(target_instance), name, bound_method)
+
+
+def update_class_from_dict(obj, dict):
+    for key, val in dict.items():
+        attr = getattr(obj, key, None)
+        if isinstance(attr, type):
+            update_class_from_dict(attr, val)
+        else:
+            setattr(obj, key, val)
+    return
+
+
+def get_class_and_parents(target_class, end_class=object):
+    classes = []
+    while True:
+        if target_class == end_class or target_class == ABC:
+            break
+        classes.append(target_class)
+        target_class = target_class.__base__
+    return classes
+
+
+def get_class_paths(classes):
+    return [inspect.getfile(target_class) for target_class in classes]
+
+
+def get_class_and_parent_paths(target_class, end_class=object):
+    classes = get_class_and_parents(target_class, end_class=end_class)
+    return get_class_paths(classes)
+
+
+def get_attrs_from_instance(instance, prefix, suffix):
+    attrs = []
+    for attr in dir(instance):
+        if attr.startswith(prefix) and attr.endswith(suffix):
+            attrs.append(attr)
+    return attrs
+
+
+def get_classes_and_parents_paths_for_instance_created_in_class(
+    target_class, prefix="", suffix="", end_class=object, **kwargs
+):
+    target_instance = target_class(**kwargs)
+    attrs = get_attrs_from_instance(target_instance, prefix, suffix)
+    items = []
+    for attr in attrs:
+        items += get_class_and_parent_paths(
+            eval(f"type(target_instance.{attr})"), end_class=end_class
+        )
+    return list(set(items))
+
+
+def get_classes_and_parents_paths_for_class_and_instance_created_in_class(
+    target_class,
+    prefix="",
+    suffix="",
+    end_class_target_class=object,
+    end_class_instance=object,
+    **kwargs,
+):
+    target_classes_and_parents = get_class_and_parents(
+        target_class, end_class=end_class_target_class
+    )
+    retrieved_classes = []
+    for target_class_and_parent in target_classes_and_parents:
+        retrieved_classes += (
+            get_classes_and_parents_paths_for_instance_created_in_class(
+                target_class_and_parent,
+                prefix=prefix,
+                suffix=suffix,
+                end_class=end_class_instance,
+                **kwargs,
+            )
+        )
+    return list(set(retrieved_classes + get_class_paths(target_classes_and_parents)))

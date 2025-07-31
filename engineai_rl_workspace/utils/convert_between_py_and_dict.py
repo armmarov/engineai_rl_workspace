@@ -7,8 +7,8 @@ from copy import deepcopy
 from engineai_rl_workspace import ENGINEAI_WORKSPACE_ROOT_DIR
 import re
 from engineai_rl_lib.base_config import BaseConfig
+from engineai_rl_lib.class_operations import get_class_and_parent_paths
 from .helpers import (
-    get_class_and_parent_paths,
     get_resume_path_from_original_path,
     get_last_run_path,
 )

@@ -2,12 +2,12 @@ import os
 from shutil import copyfile
 from .helpers import (
     get_load_run_path,
-    get_class_and_parent_paths,
     get_resume_path_from_original_path,
     get_original_path_from_resume_path,
 )
 from engineai_rl_workspace import ENGINEAI_WORKSPACE_ROOT_DIR
 from engineai_rl_lib.git import get_commit_hash, stash_files
+from engineai_rl_lib.class_operations import get_class_and_parent_paths
 
 
 def save_resume_files_from_file_paths(files, resume_dir):
