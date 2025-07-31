@@ -109,7 +109,7 @@ def apply_patch(file, repo_path):
 def stash_files(repo):
     if repo.is_dirty(untracked_files=True):
         # Stash changes
-        repo.git.stash("save")
+        repo.git.stash("push", "--include-untracked")
 
 
 def unstash_files(repo):
