@@ -453,38 +453,34 @@ class InputRetrivalEnvWrapper:
 
     def get_noise_scale_vec(self, obs_dict, obs):
         self.obs_noise_vecs = {}
-        for obs_type, obs_scale in self._obs_cfg["obs_noise"]["scales"].items():
+        for obs_type, noise_scales in self._obs_cfg["obs_noise"]["scales"].items():
+            noise_scales_tensors = {}
             obs_subtypes = self._obs_types[obs_type]
             if obs_subtypes:
                 noise_vec = torch.zeros_like(obs[obs_type][obs_subtypes[0]])
             else:
                 noise_vec = torch.zeros_like(obs[obs_type])
-            noise_scales = {}
-            for obs_type, noise_dict in self._obs_cfg["obs_noise"]["scales"].items():
-                noise_scales[obs_type] = {}
-                for obs_name in self._env.cfg.env.obs_list:
-                    if isinstance(noise_dict.get(obs_name, 1), dict):
-                        noise_scales_tensor = torch.zeros(
-                            len(self._env.dof_names),
-                            device=self.device,
-                            dtype=torch.float,
-                        )
-                        for idx, joint_name in enumerate(self._env.dof_names):
-                            for (joint_type, obs_scale) in noise_dict.get(
-                                obs_name
-                            ).items():
-                                if joint_type in joint_name:
-                                    noise_scales_tensor[idx] = obs_scale
-                        noise_scales[obs_type][obs_name] = noise_scales_tensor
-                    else:
-                        noise_scales[obs_type][obs_name] = noise_dict.get(obs_name, 1)
+            for obs_name, obs_scale in noise_scales.items():
+                if isinstance(obs_scale, dict):
+                    noise_scales_tensor = torch.zeros(
+                        len(self._env.dof_names),
+                        device=self.device,
+                        dtype=torch.float,
+                    )
+                    for idx, joint_name in enumerate(self._env.dof_names):
+                        for (joint_type, obs_joint_scale) in obs_scale.items():
+                            if joint_type in joint_name:
+                                noise_scales_tensor[idx] = obs_joint_scale
+                    noise_scales_tensors[obs_name] = noise_scales_tensor
+                else:
+                    noise_scales_tensors[obs_name] = obs_scale
             noise_level = self._obs_cfg["obs_noise"]["noise_level"]
             idx = 0
             obs_list = self._obs_cfg["components"][obs_type]["obs_list"]
             for obs_name in obs_list:
                 size = obs_dict["non_lagged_obs"]["after_reset"][obs_name].shape[1]
                 noise_vec[:, idx : idx + size] = (
-                    noise_scales[obs_type].get(obs_name, 0)
+                    noise_scales_tensors.get(obs_name, 0)
                     * noise_level
                     * self._env.obs_scales.get(obs_name, 1)
                 )
