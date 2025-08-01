@@ -84,6 +84,7 @@ class Tester:
             name = add_space_to_class_name(instance_name_to_class_name(key))
             self.testers[key] = tester_class(
                 name,
+                files,
                 loggers,
                 self.env,
                 time,

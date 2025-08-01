@@ -1,24 +1,25 @@
 from abc import ABC
 import os
-import inspect
 from engineai_gym import ENGINEAI_GYM_ROOT_DIR
 from engineai_gym.tester.loggers.logger_base import LoggerBase
-from engineai_rl_lib.class_operations import get_class_and_parent_paths
 from engineai_rl_lib.dict_operations import expand_and_overwrite_dict
 from engineai_rl_lib.files_and_dirs import import_modules_of_specific_type_from_path
 
 
 class TesterTypeBase(ABC):
-    def __init__(self, name, loggers, env, time, test_dir, extra_args):
-        exec(f"from {self.__class__.__module__} import {self.__class__.__name__}")
-        files = get_class_and_parent_paths(self.__class__, TesterTypeBase)
-        files.reverse()
-        files.insert(0, inspect.getfile(TesterTypeBase))
+    def __init__(
+        self,
+        name,
+        tester_and_parent_class_files,
+        loggers,
+        env,
+        time,
+        test_dir,
+        extra_args,
+    ):
         self.imported_classes = {}
-        for file in files:
-            current_file_directory = os.path.join(
-                os.path.dirname(os.path.dirname(file)), "loggers"
-            )
+        for file in tester_and_parent_class_files:
+            current_file_directory = os.path.join(os.path.dirname(file), "loggers")
             if os.path.exists(current_file_directory):
                 self.imported_classes = expand_and_overwrite_dict(
                     self.imported_classes,
