@@ -101,6 +101,21 @@ async def play(args):
     # override some parameters for testing
     if args.use_joystick:
         env_cfg.env.num_envs = 1
+    tester_class = import_attr_from_file_path(
+        ENGINEAI_GYM_ROOT_DIR,
+        env_cfg.tester.class_path.format(
+            ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
+        ),
+        env_cfg.tester.class_name,
+    )
+    tester = tester_class(
+        args.test_length,
+        os.path.join(log_dir, "test"),
+        env_cfg.tester.config_path.format(
+            ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
+        ),
+    )
+    env_cfg = tester.set_env_cfg(env_cfg)
 
     # prepare environment
     env = exp_registry.make_env(
@@ -130,34 +145,22 @@ async def play(args):
             video_path=os.path.join(log_dir, "test", "videos"),
         )
 
-    # load policy
-    runner = exp_registry.make_alg_runner(env, args.exp_name, args, log_dir)
-    policy = runner.get_inference_policy()
     if args.late_restore:
         checkout_commit_or_branch(repo, current_commit, current_branch)
         unstash_files(repo)
         if lock.redis.get(lock.lock_key) == lock.pid.encode():
             lock.release()
         print(INITIALIZATION_COMPLETE_MESSAGE)
-
-    tester_class = import_attr_from_file_path(
-        ENGINEAI_GYM_ROOT_DIR,
-        env_cfg.tester.class_path.format(
-            ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
-        ),
-        env_cfg.tester.class_name,
-    )
-    tester = tester_class(
-        env,
-        args.test_length,
+    tester.set_env(env, args.video)
+    tester.init_testers(
         env.dt,
         os.path.join(log_dir, "test"),
-        env_cfg.tester.config_path.format(
-            ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
-        ),
-        args.video,
         extra_args={"robot_index": args.env_idx_record},
     )
+    # load policy
+    runner = exp_registry.make_alg_runner(env, args.exp_name, args, log_dir)
+    policy = runner.get_inference_policy()
+
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
     camera_vel = np.array([1.0, 1.0, 0.0])
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
