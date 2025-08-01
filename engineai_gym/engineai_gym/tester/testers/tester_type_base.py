@@ -19,12 +19,13 @@ class TesterTypeBase(ABC):
             current_file_directory = os.path.join(
                 os.path.dirname(os.path.dirname(file)), "loggers"
             )
-            self.imported_classes = expand_and_overwrite_dict(
-                self.imported_classes,
-                import_modules_of_specific_type_from_path(
-                    ENGINEAI_GYM_ROOT_DIR, current_file_directory, LoggerBase
-                ),
-            )
+            if os.path.exists(current_file_directory):
+                self.imported_classes = expand_and_overwrite_dict(
+                    self.imported_classes,
+                    import_modules_of_specific_type_from_path(
+                        ENGINEAI_GYM_ROOT_DIR, current_file_directory, LoggerBase
+                    ),
+                )
         self.name = name
         self.env = env
         if self.__class__.__name__ != "TesterBase":

@@ -64,12 +64,13 @@ class Tester:
         self.imported_classes = {}
         for file in files:
             current_file_directory = os.path.join(os.path.dirname(file), "testers")
-            self.imported_classes = expand_and_overwrite_dict(
-                self.imported_classes,
-                import_modules_of_specific_type_from_path(
-                    ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
-                ),
-            )
+            if os.path.exists(current_file_directory):
+                self.imported_classes = expand_and_overwrite_dict(
+                    self.imported_classes,
+                    import_modules_of_specific_type_from_path(
+                        ENGINEAI_GYM_ROOT_DIR, current_file_directory, TesterTypeBase
+                    ),
+                )
         time = np.linspace(0, self.length * dt, self.length)
         if extra_args is None:
             extra_args = {}
