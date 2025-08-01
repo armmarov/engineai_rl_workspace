@@ -1,17 +1,37 @@
 from abc import ABC
-from engineai_rl_lib.class_operations import instance_name_to_class_name
-from engineai_gym.tester.loggers import *
+import os
+import inspect
+from engineai_gym import ENGINEAI_GYM_ROOT_DIR
+from engineai_gym.tester.loggers.logger_base import LoggerBase
+from engineai_rl_lib.class_operations import get_class_and_parent_paths
+from engineai_rl_lib.dict_operations import expand_and_overwrite_dict
+from engineai_rl_lib.files_and_dirs import import_modules_of_specific_type_from_path
 
 
 class TesterTypeBase(ABC):
     def __init__(self, name, loggers, env, time, test_dir, extra_args):
+        exec(f"from {self.__class__.__module__} import {self.__class__.__name__}")
+        files = get_class_and_parent_paths(self.__class__, TesterTypeBase)
+        files.reverse()
+        files.insert(0, inspect.getfile(TesterTypeBase))
+        self.imported_classes = {}
+        for file in files:
+            current_file_directory = os.path.join(
+                os.path.dirname(os.path.dirname(file)), "loggers"
+            )
+            self.imported_classes = expand_and_overwrite_dict(
+                self.imported_classes,
+                import_modules_of_specific_type_from_path(
+                    ENGINEAI_GYM_ROOT_DIR, current_file_directory, LoggerBase
+                ),
+            )
         self.name = name
         self.env = env
         if self.__class__.__name__ != "TesterBase":
             self.test_dir = os.path.join(test_dir, name)
         self.loggers = []
         for key, value in loggers.items():
-            logger_class = eval(instance_name_to_class_name(value))
+            logger_class = self.imported_classes[value]
             self.loggers.append(
                 logger_class(key, env, time, os.path.join(test_dir, name), extra_args)
             )
