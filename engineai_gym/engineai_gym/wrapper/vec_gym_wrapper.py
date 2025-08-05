@@ -117,6 +117,15 @@ class VecGymWrapper:
         self._env.goal_dict = self._env.compute_goals()
 
     @property
+    def still_commands(self):
+        return self._env.still_commands
+
+    @still_commands.setter
+    def still_commands(self, value):
+        self._env.still_commands = value
+        self._env.goal_dict = self._env.compute_goals()
+
+    @property
     def goal_dict(self):
         return self._env.goal_dict
 
