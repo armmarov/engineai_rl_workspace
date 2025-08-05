@@ -5,13 +5,13 @@ class LoggerTypeBaseVel(LoggerBase):
     def log_data(self, extra_data):
         self.add_data_to_log(
             {
-                "command_x": self.env.commands[
+                "command_x": self.env.vel_commands[
                     self.extra_args["robot_index"], 0
                 ].item(),
-                "command_y": self.env.commands[
+                "command_y": self.env.vel_commands[
                     self.extra_args["robot_index"], 1
                 ].item(),
-                "command_yaw": self.env.commands[
+                "command_yaw": self.env.vel_commands[
                     self.extra_args["robot_index"], 2
                 ].item(),
                 "base_vel_x": self.env.base_lin_vel[

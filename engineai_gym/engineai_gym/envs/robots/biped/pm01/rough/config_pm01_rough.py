@@ -209,7 +209,6 @@ class ConfigPm01Rough(ConfigBipedRobot):
         yaw_from_heading_target = (
             False  # if true: compute ang vel command from heading error
         )
-        num_commands = 3
         still_ratio = 0
 
         class ranges(ConfigBipedRobot.commands.ranges):

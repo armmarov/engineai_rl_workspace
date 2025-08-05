@@ -82,8 +82,6 @@ class ConfigLeggedRobot(BaseConfig):
     class commands:
         curriculum = False
         max_curriculum = 1.0
-        # default: lin_vel_x, lin_vel_y, ang_vel_yaw
-        num_commands = 3
         # time before command are changed[s]
         resampling_time = 10.0
         # if true: compute ang vel command from heading error

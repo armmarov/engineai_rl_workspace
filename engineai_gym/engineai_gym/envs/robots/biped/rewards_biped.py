@@ -20,7 +20,7 @@ class RewardsBiped(Rewards):
         # Penalize motion at zero commands
         return torch.sum(
             torch.abs(self.env.dof_pos - self.env.default_dof_pos), dim=1
-        ) * (torch.norm(self.env.commands[:, :2], dim=1) < 0.15)
+        ) * (torch.norm(self.env.vel_commands[:, :2], dim=1) < 0.15)
 
     def reward_feet_air_time(self):
         # Reward long steps

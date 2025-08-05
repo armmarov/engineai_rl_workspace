@@ -3,4 +3,4 @@ class Goals:
         self.env = env
 
     def commands(self):
-        return self.env.commands * self.env.commands_scales
+        return self.env.vel_commands * self.env.vel_commands_scales

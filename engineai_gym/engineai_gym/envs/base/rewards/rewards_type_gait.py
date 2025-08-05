@@ -9,7 +9,7 @@ class RewardsTypeGait(RewardsBase):
             (self.env.foot_air_time - 0.5) * self.env.first_contact, dim=1
         )  # reward only on first contact with the ground
         rew_airTime *= (
-            torch.norm(self.env.commands[:, :2], dim=1) > 0.1
+            torch.norm(self.env.vel_commands[:, :2], dim=1) > 0.1
         )  # no reward for zero command
         return rew_airTime
 
@@ -85,7 +85,7 @@ class RewardsTypeGait(RewardsBase):
                 -self.env.feet_heights / self.env.cfg.rewards.params.target_feet_height
             )
             * torch.exp(
-                -torch.norm(self.env.commands[:, :3], dim=1, keepdim=True)
+                -torch.norm(self.env.vel_commands[:, :3], dim=1, keepdim=True)
             ).repeat(1, len(self.env.foot_indices)),
             dim=1,
         )

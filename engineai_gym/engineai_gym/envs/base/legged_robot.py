@@ -436,7 +436,7 @@ class LeggedRobot(EnvBase):
         if self.cfg.commands.yaw_from_heading_target:
             forward = quat_apply(self.base_quat, self.forward_vec)
             heading = torch.atan2(forward[:, 1], forward[:, 0])
-            self.commands[:, 2] = torch.clip(
+            self.vel_commands[:, 2] = torch.clip(
                 0.5 * wrap_to_pi(self.heading_target - heading), -1.0, 1.0
             )
 
@@ -446,13 +446,13 @@ class LeggedRobot(EnvBase):
         Args:
             env_ids (List[int]): Environments ids for which new commands are needed
         """
-        self.commands[env_ids, 0] = torch_rand_float(
+        self.vel_commands[env_ids, 0] = torch_rand_float(
             self.command_ranges["lin_vel_x"][0],
             self.command_ranges["lin_vel_x"][1],
             (len(env_ids), 1),
             device=self.device,
         ).squeeze(1)
-        self.commands[env_ids, 1] = torch_rand_float(
+        self.vel_commands[env_ids, 1] = torch_rand_float(
             self.command_ranges["lin_vel_y"][0],
             self.command_ranges["lin_vel_y"][1],
             (len(env_ids), 1),
@@ -466,7 +466,7 @@ class LeggedRobot(EnvBase):
                 device=self.device,
             ).squeeze(1)
         else:
-            self.commands[env_ids, 2] = torch_rand_float(
+            self.vel_commands[env_ids, 2] = torch_rand_float(
                 self.command_ranges["ang_vel_yaw"][0],
                 self.command_ranges["ang_vel_yaw"][1],
                 (len(env_ids), 1),
@@ -474,20 +474,22 @@ class LeggedRobot(EnvBase):
             ).squeeze(1)
 
         # set small commands to zero
-        self.commands[env_ids, :2] *= (
-            torch.norm(self.commands[env_ids, :2], dim=1)
+        self.vel_commands[env_ids, :2] *= (
+            torch.norm(self.vel_commands[env_ids, :2], dim=1)
             > self.cfg.commands.lin_vel_set_zero_threshold
         ).unsqueeze(1)
-        self.commands[env_ids, 2] *= (
-            torch.abs(self.commands[env_ids, 2])
+        self.vel_commands[env_ids, 2] *= (
+            torch.abs(self.vel_commands[env_ids, 2])
             > self.cfg.commands.ang_vel_set_zero_threshold
         )
 
-        self.stand_still_idx[env_ids] = (
+        stand_still_idx = (
             torch_rand_float(0, 1, (len(env_ids), 1), device=self.device).squeeze(1)
             < self.cfg.commands.still_ratio
         )
-        self.commands[env_ids[self.stand_still_idx[env_ids]]] = 0.0
+        self.vel_commands[env_ids[stand_still_idx], :3] = 0.0
+        self.still_commands[env_ids[stand_still_idx]] = True
+        self.still_commands[~env_ids[stand_still_idx]] = False
 
     def _compute_torques(self):
         """Compute torques from actions.
@@ -617,7 +619,7 @@ class LeggedRobot(EnvBase):
         # robots that walked less than half of their required distance go to simpler terrains
         move_down = (
             distance
-            < torch.norm(self.commands[env_ids, :2], dim=1)
+            < torch.norm(self.vel_commands[env_ids, :2], dim=1)
             * self.max_episode_length_s
             * 0.5
         ) * ~move_up
@@ -742,14 +744,22 @@ class LeggedRobot(EnvBase):
         self.feet_heights = torch.zeros(
             (self.num_envs, len(self.foot_indices)), device=self.device
         )
-        self.commands = torch.zeros(
+        self.vel_commands = torch.zeros(
             self.num_envs,
-            self.cfg.commands.num_commands,
+            3,
             dtype=torch.float,
             device=self.device,
             requires_grad=False,
         )  # x vel, y vel, yaw vel
-        self.commands_scales = torch.tensor(
+
+        self.still_commands = torch.zeros(
+            self.num_envs,
+            dtype=torch.bool,
+            device=self.device,
+            requires_grad=False,
+        )  # x vel, y vel, yaw vel
+
+        self.vel_commands_scales = torch.tensor(
             [
                 self.obs_scales.get("base_lin_vel", 1),
                 self.obs_scales.get("base_lin_vel", 1),
@@ -788,9 +798,6 @@ class LeggedRobot(EnvBase):
                 device=self.device,
                 requires_grad=False,
             )
-        self.stand_still_idx = torch.zeros(
-            self.num_envs, dtype=torch.bool, device=self.device, requires_grad=False
-        )
         self.heading_target = torch.zeros(
             self.num_envs, dtype=torch.float, device=self.device, requires_grad=False
         )
@@ -847,7 +854,7 @@ class LeggedRobot(EnvBase):
     def get_phase(self):
         cycle_time = self.cfg.gait.cycle_time
         phase = self.episode_length_buf * self.dt / cycle_time
-        phase[self.stand_still_idx] = 0.0
+        phase[self.still_commands == 1.0] = 0.0
         return phase
 
     def _prepare_reward_function(self):

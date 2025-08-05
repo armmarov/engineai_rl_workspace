@@ -200,15 +200,15 @@ async def play(args):
 
 def set_commands_from_joystick(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd):
     global last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd
-    env.commands[:, 0] = x_vel_cmd
-    env.commands[:, 1] = y_vel_cmd
-    env.commands[:, 2] = yaw_vel_cmd
+    env.vel_commands[:, 0] = x_vel_cmd
+    env.vel_commands[:, 1] = y_vel_cmd
+    env.vel_commands[:, 2] = yaw_vel_cmd
     if (
         last_x_vel_cmd != x_vel_cmd
         or last_y_vel_cmd != y_vel_cmd
         or last_yaw_vel_cmd != yaw_vel_cmd
     ):
-        print("Current command: ", env.commands[:, :3])
+        print("Current command: ", env.vel_commands[:, :3])
         last_x_vel_cmd = x_vel_cmd
         last_y_vel_cmd = y_vel_cmd
         last_yaw_vel_cmd = yaw_vel_cmd

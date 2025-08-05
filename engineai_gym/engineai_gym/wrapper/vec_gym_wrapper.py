@@ -108,17 +108,13 @@ class VecGymWrapper:
         return self._env.torques
 
     @property
-    def commands(self):
-        return self._env.commands
+    def vel_commands(self):
+        return self._env.vel_commands
 
-    @commands.setter
-    def commands(self, value):
-        self._env.commands = value
+    @vel_commands.setter
+    def vel_commands(self, value):
+        self._env.vel_commands = value
         self._env.goal_dict = self._env.compute_goals()
-
-    @property
-    def num_commands(self):
-        return self.commands.shape[-1]
 
     @property
     def goal_dict(self):

@@ -4,5 +4,5 @@ from engineai_rl_lib.command_filter import convert_to_visible_commands
 
 class TesterNormalCommands(TesterTypeBase):
     def set_goals(self) -> None:
-        convert_to_visible_commands(self.env.commands)
+        convert_to_visible_commands(self.env.vel_commands)
         return self.env.goal_dict

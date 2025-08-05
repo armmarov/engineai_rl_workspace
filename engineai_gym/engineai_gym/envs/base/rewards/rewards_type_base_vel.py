@@ -14,14 +14,15 @@ class RewardsTypeBaseVel(RewardsBase):
     def reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.sum(
-            torch.square(self.env.commands[:, :2] - self.env.base_lin_vel[:, :2]), dim=1
+            torch.square(self.env.vel_commands[:, :2] - self.env.base_lin_vel[:, :2]),
+            dim=1,
         )
         return torch.exp(-lin_vel_error / self.env.cfg.rewards.params.tracking_sigma)
 
     def reward_tracking_ang_vel(self):
         # Tracking of angular velocity commands (yaw)
         ang_vel_error = torch.square(
-            self.env.commands[:, 2] - self.env.base_ang_vel[:, 2]
+            self.env.vel_commands[:, 2] - self.env.base_ang_vel[:, 2]
         )
         return torch.exp(-ang_vel_error / self.env.cfg.rewards.params.tracking_sigma)
 
@@ -29,7 +30,7 @@ class RewardsTypeBaseVel(RewardsBase):
         # Penalize motion at zero commands
         return torch.sum(
             torch.abs(self.env.dof_pos - self.env.default_dof_pos), dim=1
-        ) * (torch.norm(self.env.commands[:, :2], dim=1) < 0.1)
+        ) * (torch.norm(self.env.vel_commands[:, :2], dim=1) < 0.1)
 
     def reward_base_acc(self):
         """
@@ -59,12 +60,14 @@ class RewardsTypeBaseVel(RewardsBase):
         """
         # Tracking of linear velocity commands (xy axes)
         lin_vel_error = torch.norm(
-            self.env.commands[:, :2] - self.env.base_lin_vel[:, :2], dim=1
+            self.env.vel_commands[:, :2] - self.env.base_lin_vel[:, :2], dim=1
         )
         lin_vel_error_exp = torch.exp(-lin_vel_error * 10)
 
         # Tracking of angular velocity commands (yaw)
-        ang_vel_error = torch.abs(self.env.commands[:, 2] - self.env.base_ang_vel[:, 2])
+        ang_vel_error = torch.abs(
+            self.env.vel_commands[:, 2] - self.env.base_ang_vel[:, 2]
+        )
         ang_vel_error_exp = torch.exp(-ang_vel_error * 10)
 
         linear_error = 0.2 * (lin_vel_error + ang_vel_error)
@@ -79,7 +82,7 @@ class RewardsTypeBaseVel(RewardsBase):
         """
         # Calculate the absolute value of speed and command for comparison
         absolute_speed = torch.abs(self.env.base_lin_vel[:, 0])
-        absolute_command = torch.abs(self.env.commands[:, 0])
+        absolute_command = torch.abs(self.env.vel_commands[:, 0])
 
         # Define speed criteria for desired range
         speed_too_low = absolute_speed < 0.5 * absolute_command
@@ -88,7 +91,7 @@ class RewardsTypeBaseVel(RewardsBase):
 
         # Check if the speed and command directions are mismatched
         sign_mismatch = torch.sign(self.env.base_lin_vel[:, 0]) != torch.sign(
-            self.env.commands[:, 0]
+            self.env.vel_commands[:, 0]
         )
 
         # Initialize reward tensor
@@ -103,4 +106,4 @@ class RewardsTypeBaseVel(RewardsBase):
         reward[speed_desired] = 2.0
         # Sign mismatch has the highest priority
         reward[sign_mismatch] = -2.0
-        return reward * (self.env.commands[:, 0].abs() > 0.1)
+        return reward * (self.env.vel_commands[:, 0].abs() > 0.1)
