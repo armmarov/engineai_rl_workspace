@@ -39,15 +39,17 @@ from engineai_rl_lib.files_and_dirs import import_attr_from_file_path
 async def play(args):
     global lock, repo, current_commit, current_branch
     lock = RedisLock(REDIS_HOST, LOCK_KEY, REDIS_PORT, LOCK_TIMEOUT, LOCK_MESSAGE)
-    global x_vel_cmd, y_vel_cmd, yaw_vel_cmd, last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd
+    global x_vel_cmd, y_vel_cmd, yaw_vel_cmd, still_cmd, last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd, last_still_cmd
     (
         x_vel_cmd,
         y_vel_cmd,
         yaw_vel_cmd,
+        still_cmd,
         last_x_vel_cmd,
         last_y_vel_cmd,
         last_yaw_vel_cmd,
-    ) = (0, 0, 0, 0, 0, 0)
+        last_still_cmd,
+    ) = (0, 0, 0, False, 0, 0, 0, False)
     args.resume = True
     if not await lock.acquire():
         print("Could not acquire lock, exiting...")
@@ -171,7 +173,7 @@ async def play(args):
     if args.use_joystick:
         inputs = runner.reset(
             set_commands_from_joystick,
-            set_goals_callback_args=(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd),
+            set_goals_callback_args=(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd, still_cmd),
         )
     else:
         inputs = runner.reset(tester.set_goals, set_goals_callback_args=(0,))
@@ -181,7 +183,13 @@ async def play(args):
                 inputs,
                 policy,
                 set_commands_from_joystick,
-                set_goals_callback_args=(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd),
+                set_goals_callback_args=(
+                    env,
+                    x_vel_cmd,
+                    y_vel_cmd,
+                    yaw_vel_cmd,
+                    still_cmd,
+                ),
             )
         else:
             if iter + 1 < tester.num_testers * args.test_length:
@@ -198,20 +206,29 @@ async def play(args):
             tester.step(iter, {"actions": actions})
 
 
-def set_commands_from_joystick(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd):
-    global last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd
+def set_commands_from_joystick(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd, still_cmd):
+    global last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd, last_still_cmd
     env.vel_commands[:, 0] = x_vel_cmd
     env.vel_commands[:, 1] = y_vel_cmd
     env.vel_commands[:, 2] = yaw_vel_cmd
+    env.still_commands[:] = still_cmd
     if (
         last_x_vel_cmd != x_vel_cmd
         or last_y_vel_cmd != y_vel_cmd
         or last_yaw_vel_cmd != yaw_vel_cmd
+        or last_still_cmd != still_cmd
     ):
-        print("Current command: ", env.vel_commands[:, :3])
+        print(
+            "Current Command: \n",
+            "Vel Commands: ",
+            env.vel_commands,
+            "Still Commands: ",
+            env.still_commands,
+        )
         last_x_vel_cmd = x_vel_cmd
         last_y_vel_cmd = y_vel_cmd
         last_yaw_vel_cmd = yaw_vel_cmd
+        last_still_cmd = still_cmd
 
 
 def use_joystick(args):
@@ -227,7 +244,7 @@ def use_joystick(args):
 
     # handle joystick thread
     def handle_joystick_input():
-        global x_vel_cmd, y_vel_cmd, yaw_vel_cmd, last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd
+        global x_vel_cmd, y_vel_cmd, yaw_vel_cmd, still_cmd, last_x_vel_cmd, last_y_vel_cmd, last_yaw_vel_cmd, last_still_cmd
         while True:
             # get joystick input
             pygame.event.get()
@@ -236,6 +253,8 @@ def use_joystick(args):
             x_vel_cmd = -joystick.get_axis(1) * args.joystick_scale[0]
             y_vel_cmd = -joystick.get_axis(0) * args.joystick_scale[1]
             yaw_vel_cmd = -joystick.get_axis(3) * args.joystick_scale[2]
+            if joystick.get_button(0):
+                still_cmd = ~still_cmd
 
             # wait for a short period of time
             pygame.time.delay(100)
