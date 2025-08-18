@@ -3,7 +3,6 @@ from engineai_gym.envs.base.config_legged_robot import ConfigLeggedRobot
 
 class ConfigAnymalCRough(ConfigLeggedRobot):
     class env(ConfigLeggedRobot.env):
-        num_envs = 64
         action_joints = [
             "LF_HAA",
             "RF_HAA",
@@ -48,7 +47,7 @@ class ConfigAnymalCRough(ConfigLeggedRobot):
         action_scales = {"HAA": 0.5, "HFE": 0.5, "KFE": 0.5}
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
-        use_actuator_network = False
+        use_actuator_network = True
         actuator_net_file = (
             "{ENGINEAI_GYM_PACKAGE_DIR}/resources/actuator_nets/anydrive_v3_lstm.pt"
         )
@@ -60,8 +59,8 @@ class ConfigAnymalCRough(ConfigLeggedRobot):
         penalize_contacts_on = ["SHANK", "THIGH"]
         terminate_after_contacts_on = ["base"]
         self_collisions = 1  # 1 to disable, 0 to enable...bitwise filter
-        joint_armature = {"HAA": 0.04, "HFE": 0.04, "KFE": 0.04}
-        joint_friction = {"HAA": 1, "HFE": 1, "KFE": 1}
+        joint_armature = {"HAA": 0.001, "HFE": 0.001, "KFE": 0.001}
+        joint_friction = {"HAA": 0, "HFE": 0, "KFE": 0}
 
     class domain_rands(ConfigLeggedRobot.domain_rands):
         class rigid_body(ConfigLeggedRobot.domain_rands.rigid_body):
@@ -76,4 +75,11 @@ class ConfigAnymalCRough(ConfigLeggedRobot):
             soft_dof_torque_limit_multi = {"HAA": 1.0, "HFE": 1.0, "KFE": 1.0}
 
         class scales(ConfigLeggedRobot.rewards.scales):
-            pass
+            feet_distance = 0.0
+            foot_slip = 0.0
+            base_acc = 0.0
+            vel_mismatch_exp = 0.0
+            track_vel_hard = 0.0
+            default_joint_pos = 0.0
+            low_speed = 0.0
+            action_smoothness = -0.0

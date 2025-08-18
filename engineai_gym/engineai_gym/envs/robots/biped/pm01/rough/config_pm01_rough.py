@@ -209,7 +209,7 @@ class ConfigPm01Rough(ConfigBipedRobot):
         yaw_from_heading_target = (
             False  # if true: compute ang vel command from heading error
         )
-        still_ratio = 0
+        still_ratio = 0.1
 
         class ranges(ConfigBipedRobot.commands.ranges):
             lin_vel_x = [-1.5, 1.5]  # min max [m/s]

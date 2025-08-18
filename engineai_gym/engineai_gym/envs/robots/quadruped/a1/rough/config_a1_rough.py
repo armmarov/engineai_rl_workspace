@@ -49,8 +49,8 @@ class ConfigA1Rough(ConfigLeggedRobot):
         penalize_contacts_on = ["thigh", "calf"]
         terminate_after_contacts_on = ["base"]
         self_collisions = 1
-        joint_armature = {"hip": 0.04, "thigh": 0.04, "calf": 0.04}
-        joint_friction = {"hip": 1, "thigh": 1, "calf": 1}
+        joint_armature = {"hip": 0.001, "thigh": 0.001, "calf": 0.001}
+        joint_friction = {"hip": 0, "thigh": 0, "calf": 0}
 
     class rewards(ConfigLeggedRobot.rewards):
         class params(ConfigLeggedRobot.rewards.params):
@@ -59,5 +59,13 @@ class ConfigA1Rough(ConfigLeggedRobot):
             soft_dof_torque_limit_multi = {"hip": 1.0, "thigh": 1.0, "calf": 1.0}
 
         class scales(ConfigLeggedRobot.rewards.scales):
+            feet_distance = 0.0
+            foot_slip = 0.0
+            base_acc = 0.0
+            vel_mismatch_exp = 0.0
+            track_vel_hard = 0.0
+            default_joint_pos = 0.0
+            low_speed = 0.0
+            action_smoothness = -0.0
             torques = -0.0002
             dof_pos_limits = -10.0

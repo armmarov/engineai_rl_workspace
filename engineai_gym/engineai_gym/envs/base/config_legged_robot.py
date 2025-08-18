@@ -87,7 +87,7 @@ class ConfigLeggedRobot(BaseConfig):
         # if true: compute ang vel command from heading error
         yaw_from_heading_target = True
         # probability of still commands
-        still_ratio = 0.25
+        still_ratio = 0
         # set command to zero if command < set_zero_threshold
         lin_vel_set_zero_threshold = 0.3
         ang_vel_set_zero_threshold = 0.314
