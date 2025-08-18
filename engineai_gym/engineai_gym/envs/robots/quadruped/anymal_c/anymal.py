@@ -11,7 +11,7 @@ import torch
 from typing import Tuple, Dict
 
 from engineai_gym.envs import LeggedRobot
-from engineai_gym import ENGINEAI_GYM_ROOT_DIR
+from engineai_gym import ENGINEAI_GYM_PACKAGE_DIR
 
 
 class Anymal(LeggedRobot):
@@ -42,7 +42,7 @@ class Anymal(LeggedRobot):
         # load actuator network
         if self.cfg.control.use_actuator_network:
             actuator_network_path = self.cfg.control.actuator_net_file.format(
-                ENGINEAI_GYM_ROOT_DIR=ENGINEAI_GYM_ROOT_DIR
+                ENGINEAI_GYM_PACKAGE_DIR=ENGINEAI_GYM_PACKAGE_DIR
             )
             self.actuator_network = torch.jit.load(actuator_network_path).to(
                 self.device
