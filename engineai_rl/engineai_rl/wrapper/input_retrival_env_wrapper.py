@@ -54,7 +54,7 @@ class InputRetrivalEnvWrapper:
     def step(self, actions, set_goals_callback=None, set_goals_callback_args=None):
         obs_dict, goal_dict, rewards, dones, infos = self._env.step(actions)
         if set_goals_callback is not None:
-            goal_dict = set_goals_callback(*set_goals_callback_args)
+            set_goals_callback(*set_goals_callback_args)
         obs_dict, goal_dict = input_to_device(obs_dict, self.device), input_to_device(
             goal_dict, self.device
         )
