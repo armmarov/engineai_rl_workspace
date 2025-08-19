@@ -1,6 +1,7 @@
 import os, asyncio
 from collections import OrderedDict
 from git import Repo
+import re
 
 from engineai_rl_workspace.utils import (
     get_args,
@@ -83,6 +84,11 @@ async def export_policy(args):
     load_checkpoint = get_load_checkpoint_path(
         load_run=log_dir, checkpoint=args.checkpoint
     )
+    match = re.search(r"model_(\d+)\.pt", load_checkpoint)
+    if match:
+        checkpoint_num = int(match.group(1))
+    else:
+        raise FileExistsError("Checkpoint not found")
     path = os.path.join(log_dir, "policies")
     loaded_dict = torch.load(load_checkpoint, map_location=torch.device(args.rl_device))
     inference_network_names = algo_cfg.networks.inference
@@ -271,17 +277,19 @@ async def export_policy(args):
     combined_networks = CombinedNetworks(network_list)
 
     convert_nn_to_onnx(
-        combined_networks, path, args.exp_name + "_" + args.load_run + "_policy"
+        combined_networks,
+        path,
+        f"{args.exp_name}_{args.load_run}_{checkpoint_num}_policy",
     )
 
     convert_onnx_to_mnn(
         os.path.join(
             path,
-            args.exp_name + "_" + args.load_run + "_policy" + ".onnx",
+            f"{args.exp_name}_{args.load_run}_{checkpoint_num}_policy.onnx",
         ),
         os.path.join(
             path,
-            args.exp_name + "_" + args.load_run + "_policy" + ".mnn",
+            f"{args.exp_name}_{args.load_run}_{checkpoint_num}_policy.mnn",
         ),
     )
     if args.late_restore:
