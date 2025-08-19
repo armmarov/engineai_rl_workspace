@@ -35,7 +35,7 @@ from engineai_rl_lib.git import (
 from engineai_rl_lib.class_operations import class_to_dict
 from engineai_rl_lib.redis_lock import RedisLock
 from engineai_rl_lib.networks import CombinedNetworks
-from engineai_rl.modules.networks import *
+
 
 import torch
 
@@ -99,6 +99,7 @@ async def export_policy(args):
             eval(f"algo_cfg.networks.{inference_network_name}")
         )
         inference_network_class_name = inference_network_cfg.pop("class_name")
+        exec(f"from engineai_rl.modules.networks import {inference_network_class_name}")
         inference_network_class = eval(inference_network_class_name)
         network_input_infos = inference_network_cfg.pop("input_infos")
         input_dim_infos = {}
