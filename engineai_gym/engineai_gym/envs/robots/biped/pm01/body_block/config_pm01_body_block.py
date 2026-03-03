@@ -137,7 +137,10 @@ class ConfigPm01BodyBlock(ConfigPm01Rough):
             "head_yaw": 0.3,
         }
 
-        decimation = 10  # 100hz
+        decimation = 5  # 100hz (with sim.dt=0.002)
+
+    class sim(ConfigPm01Rough.sim):
+        dt = 0.002  # 500 Hz (reduced from 1000 Hz for T4 GPU performance)
 
     class ref_state(ConfigLeggedRobotRef.ref_state):
         ref_state_loader = True
