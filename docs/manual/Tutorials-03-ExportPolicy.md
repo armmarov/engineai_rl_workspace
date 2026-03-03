@@ -13,7 +13,7 @@
 
 ### Examples
 
-```
+```shell
 # basic
 python engineai_rl_workspace/scripts/export_policy.py --exp_name pm01_rough_ppo --load_run 2025-06-03_12-00-00
 # specific checkpoint

@@ -32,7 +32,7 @@
 
 #### Play with a Tester
 
-```
+```shell
 # default setting
 python engineai_rl_workspace/scripts/play.py --exp_name pm01_rough_ppo --load_run 2025-06-03_12-00-00
 # custom test_length
@@ -47,6 +47,6 @@ python engineai_rl_workspace/scripts/play.py --exp_name pm01_rough_ppo --headles
 
 #### Play with Joystick
 
-```
+```shell
 python engineai_rl_workspace/scripts/play.py --exp_name pm01_rough_ppo --load_run 2025-06-03_12-00-00 --use_joystick
 ```

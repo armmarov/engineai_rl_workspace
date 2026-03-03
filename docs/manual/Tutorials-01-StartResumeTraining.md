@@ -39,7 +39,7 @@
 
 Files required to resume the run will be saved for resume or play, which will work even when the code is changed.
 
-```
+```shell
 # basic
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo
 # headless
@@ -54,7 +54,7 @@ MASTER_PORT=12346 torchrun --standalone --nnodes=1 --nproc_per_node=2 engineai_r
 
 #### Video Recording
 
-```
+```shell
 # default setting
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headless --video
 # custom setting
@@ -65,7 +65,7 @@ python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headle
 
 Since a config is saved for each, if you want to start a new run with modification of the `.json` config of a old run, you can create a new folder copying the old config, modify the config, and run a training from it. The Algos config files will be converted to `.py` config files, and used for training.
 
-```
+```shell
 # from a default sub_exp_name
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headless --run_exist --load_run 2025-06-03_12-00-00
 # from a specific sub_exp_name
@@ -74,13 +74,13 @@ python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headle
 
 #### Using a Specific Logger (Tensorboard, Wandb, Neptune)
 
-```
+```shell
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headless --logger wandb
 ```
 
 #### Resume a Run
 
-```
+```shell
 # resume from default log root
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headless --resume --load_run 2025-06-03_12-00-00
 # resume from a specific log root
@@ -93,7 +93,7 @@ python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headle
 
 Training won't save log files in debug mode, so user can maintain a clean log directory
 
-```
+```shell
 # debug mode
 python engineai_rl_workspace/scripts/train.py --exp_name pm01_rough_ppo --headless --debug
 ```
