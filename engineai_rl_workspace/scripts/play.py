@@ -178,9 +178,10 @@ async def play(args):
     else:
         inputs = runner.reset(tester.set_goals, set_goals_callback_args=(0,))
     for iter in iteration_range:
+        prev_inputs = inputs
         if args.use_joystick:
             inputs, actions, _, _, _ = runner.step(
-                inputs,
+                prev_inputs,
                 policy,
                 set_commands_from_joystick,
                 set_goals_callback_args=(
@@ -193,8 +194,8 @@ async def play(args):
             )
         else:
             if iter + 1 < tester.num_testers * args.test_length:
-                inputs, actions, _, _, _ = runner.step(
-                    inputs,
+                inputs, actions, _, _, rewards = runner.step(
+                    prev_inputs,
                     policy,
                     tester.set_goals,
                     set_goals_callback_args=(iter + 1,),
@@ -203,7 +204,16 @@ async def play(args):
             camera_position += camera_vel * env.dt
             env.set_camera(camera_position, camera_position + camera_direction)
         if not args.use_joystick:
-            tester.step(iter, {"actions": actions})
+            extra_data = {"actions": actions}
+            if hasattr(runner.algo, "discriminator") and "amp" in prev_inputs and "amp" in inputs:
+                amp_reward, amp_disc_pred = runner.algo.discriminator.predict_amp_reward(
+                    prev_inputs["amp"]["after_reset"],
+                    inputs["amp"]["before_reset"],
+                    rewards,
+                )
+                extra_data["amp_reward"] = amp_reward
+                extra_data["amp_disc_pred"] = amp_disc_pred
+            tester.step(iter, extra_data)
 
 
 def set_commands_from_joystick(env, x_vel_cmd, y_vel_cmd, yaw_vel_cmd, still_cmd):

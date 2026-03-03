@@ -1,0 +1,36 @@
+testers:
+  tester_normal_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_zero_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_x_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_y_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_yaw_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_forward_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]
+  tester_backward_commands:
+    loggers:
+      [ logger_type_base_vel, logger_type_position, logger_type_torque,
+        logger_type_vel, logger_type_force, logger_type_upper_body_position,
+        logger_type_amp_reward, logger_type_amp_discriminator ]

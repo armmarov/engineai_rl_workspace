@@ -157,6 +157,9 @@ class ConfigPm01BodyBlock(ConfigPm01Rough):
             "base_ang_vel": "root_ang_vel",
         }
 
+    class tester(ConfigPm01Rough.tester):
+        config_path = "{ENGINEAI_GYM_PACKAGE_DIR}/envs/robots/biped/pm01/body_block/tester_config.yaml"
+
     class asset(ConfigPm01Rough.asset):
         # Full body URDF with all joints movable
         file = "{ENGINEAI_GYM_PACKAGE_DIR}/resources/robots/biped/pm01/urdf/pm01.urdf"
