@@ -186,6 +186,8 @@ class ConfigPm01BodyBlock(ConfigPm01Rough):
             randomize_gains = True
             stiffness_multi_range = [0.9, 1.1]
             damping_multi_range = [0.9, 1.1]
+            randomize_joint_friction = False
+            randomize_joint_armature = False
 
     class commands(ConfigPm01Rough.commands):
         curriculum = False
